@@ -1,0 +1,185 @@
+﻿namespace HomeTest_Q3
+{
+    internal class Program
+    {
+        // את הפעולות של הקלאסים שנתונות כתבתי עם הצאט , זה ארוך מאוד
+        // get & set עשיתי בדרך המקוצרת , ככה אני עושה לרוב וגם זה מקל על הכתיבה
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello, World!");
+
+            Diary diary = new Diary();
+            Date date1 = new Date(1, 1, 2025);
+            diary.AddEvent(new PhoneCall(date1, 10, "Yonatan Burstein", "123456", 30));
+            diary.AddEvent(new PhoneCall(date1, 15, "Gideon :)", "23232", 20));
+
+
+            foreach (PhoneCall call in diary.AllCalls(date1))
+            {
+                Console.WriteLine(call);
+            }
+
+        }
+        public class Date
+        {
+            public int Day { get; set; }
+            public int Month { get; set; }
+            public int Year { get; set; }
+
+
+            
+            public Date(int day, int month, int year)
+            {
+                Day = day;
+                Month = month;
+                Year = year;
+            }
+
+            public override string ToString()
+            {
+                return $"{Day}/{Month}/{Year}";
+            }
+
+            public bool Same(Date other)
+            {
+                return this.Day == other.Day && this.Month == other.Month && this.Year == other.Year;
+            }
+        }
+
+        // מחלקת Event
+        public abstract class Event
+        {
+            protected Date Date { get; set; }
+            protected int Hour { get; set; }
+
+            public Date GetDate()
+            { return this.Date; }
+            public Event(Date date, int hour)
+            {
+                Date = date;
+                Hour = hour;
+            }
+
+            public virtual bool Match(string name)
+            {
+                return false;
+            }
+        }
+
+        // מחלקת Meeting
+        public class Meeting : Event
+        {
+            public string[] ArrNames { get; set; }
+            public int Duration { get; set; }
+            public string Location { get; set; }
+
+            public Meeting(Date date, int hour, string[] arrNames, int duration, string location)
+                : base(date, hour)
+            {
+                ArrNames = arrNames;
+                Duration = duration;
+                Location = location;
+            }
+
+            public override string ToString()
+            {
+                return $"Meeting on {Date} at {Hour}:00, Duration: {Duration} mins, Location: {Location}";
+            }
+
+            public override bool Match(string name)
+            {
+                foreach (string p in ArrNames)
+                {
+                    if (p == name)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        // מחלקת PhoneCall
+        public class PhoneCall : Event
+        {
+            public string Name { get; set; }
+            public string PhoneNumber { get; set; }
+            public int Duration { get; set; }
+
+            public PhoneCall(Date date, int hour, string name, string phoneNumber, int duration)
+                : base(date, hour)
+            {
+                Name = name;
+                PhoneNumber = phoneNumber;
+                Duration = duration;
+            }
+
+            public override string ToString()
+            {
+                return $"PhoneCall on {Date} at {Hour}:00 with {Name}, Duration: {Duration} mins";
+            }
+
+            public override bool Match(string name)
+            {
+                return Name == name;
+            }
+        }
+
+        // מחלקת Task
+        public class Task : Event
+        {
+            public string Description { get; set; }
+
+            public Task(Date date, int hour, string description) : base(date, hour)
+            {
+                Description = description;
+            }
+
+            public override string ToString()
+            {
+                return $"Task on {Date} at {Hour}:00, Description: {Description}";
+            }
+
+
+        }
+
+        // מחלקת Diary
+        public class Diary
+        {
+            private Event[] events;
+            private int size;
+
+            public Diary()
+            {
+                events = new Event[1000];
+                size = 0;
+            }
+
+            public void AddEvent(Event e)
+            {
+                if (size < events.Length)
+                {
+                    events[size] = e;
+                    size++;
+                }
+            }
+            public PhoneCall[] AllCalls(Date date)//ב
+            {
+                PhoneCall[] calls = new PhoneCall[100];
+                int i = 0;
+                foreach (Event e in events)
+                {
+                    if (e is PhoneCall && e.GetDate().Same(date))
+                    {
+                        calls[i] = (PhoneCall)e;
+                        i++;
+                    }
+                }
+
+                return calls;
+            }
+
+
+        }
+    }
+}
